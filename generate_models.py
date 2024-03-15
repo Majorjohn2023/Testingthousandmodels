@@ -6,11 +6,12 @@ num_models = 1000
 # Base model name
 base_model_name = "lineitem"
 
-# TPC-H tables to join (assumed to be dbt models if in this list)
-dbt_tables = ["orders", "customer", "part", "supplier", "partsupp"]
+# Database and schema for TPC-H tables to join
+database_name = "snowflake_sample_data"
+schema_name = "tpch_sf1"
 
-# Non-dbt tables (raw tables in your database)
-external_tables = {"orders": "public.orders"}  # Example: {"table_name": "schema.table_name"}
+# TPC-H tables to join
+tables = ["orders", "customer", "part", "supplier", "partsupp"]
 
 # Output directory
 output_dir = "models"
@@ -19,27 +20,23 @@ output_dir = "models"
 os.makedirs(output_dir, exist_ok=True)
 
 def generate_model(model_index, prev_model_name, join_table):
-    # Determine if join_table is a dbt model or an external table
-    if join_table in dbt_tables:
-        table_reference = f"{{{{ ref('{join_table}') }}}}"
-    else:
-        # Fall back to external table reference (update this as needed)
-        table_reference = external_tables.get(join_table, join_table)
+    # Define the join condition based on the model index and the specific table
+    join_conditions = {
+        "orders": "m.l_orderkey = t.o_orderkey",
+        "customer": "m.l_custkey = t.c_custkey",
+        "part": "m.l_partkey = t.p_partkey",
+        "supplier": "m.l_suppkey = t.s_suppkey",
+        "partsupp": "m.l_partkey = t.ps_partkey and m.l_suppkey = t.ps_suppkey"
+    }
     
-    join_conditions = [
-        "m.l_orderkey = t.o_orderkey",
-        "m.l_custkey = t.c_custkey",
-        "m.l_partkey = t.p_partkey",
-        "m.l_suppkey = t.s_suppkey",
-        "m.l_partkey = t.ps_partkey and m.l_suppkey = t.ps_suppkey"
-    ]
+    # Construct the FROM and JOIN parts of the SQL query
+    from_join_sql = (
+        f"SELECT m.*, t.*\n"
+        f"FROM {{{{ ref('{prev_model_name}') }}}} m\n"
+        f"JOIN {database_name}.{schema_name}.{join_table} t ON {join_conditions.get(join_table, 'm.key = t.key')}"
+    )
     
-    # Default join condition if outside predefined joins
-    default_condition = "m.key = t.key"
-    # Get the appropriate join condition based on model_index
-    join_condition = join_conditions[model_index - 1] if model_index <= len(join_conditions) else default_condition
-
-    return f"SELECT m.*, t.* FROM {{{{ ref('{prev_model_name}') }}}} m JOIN {table_reference} t ON {join_condition}"
+    return from_join_sql
 
 # Generate model files
 for i in range(num_models):
@@ -49,11 +46,11 @@ for i in range(num_models):
     with open(model_file, "w") as f:
         f.write("{{ config(materialized='table') }}\n\n")
         if i == 0:
-            f.write(f"SELECT * FROM {{{{ ref('{base_model_name}') }}}}")
+            f.write(f"SELECT * FROM {{ ref('{base_model_name}') }}")
         else:
             prev_model_name = f"model_{i}"
-            table_index = (i - 1) % len(dbt_tables)
-            join_table = dbt_tables[table_index]
-            f.write(generate_model(i, prev_model_name, join_table))
+            table_index = (i - 1) % len(tables)
+            join_table = tables[table_index]
+            f.write(generate_model(i + 1, prev_model_name, join_table))
 
 print(f"{num_models} model files generated in {output_dir}")
