@@ -23,7 +23,7 @@ def generate_model(model_index, prev_model_name, join_table):
     # Define the join condition based on the model index and the specific table
     join_conditions = {
         "orders": "m.l_orderkey = t.o_orderkey",
-        "customer": "m.l_custkey = t.c_custkey",
+        "customer": "m.o_custkey = t.c_custkey",  # Updated from m.l_custkey to m.o_custkey
         "part": "m.l_partkey = t.p_partkey",
         "supplier": "m.l_suppkey = t.s_suppkey",
         "partsupp": "m.l_partkey = t.ps_partkey and m.l_suppkey = t.ps_suppkey"
