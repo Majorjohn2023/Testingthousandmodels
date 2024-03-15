@@ -1,3 +1,3 @@
 {{ config(materialized='table') }}
 
-SELECT * FROM { ref('lineitem') }
+SELECT * FROM snowflake_sample_data.tpch_sf1.lineitem
