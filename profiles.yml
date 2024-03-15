@@ -1,0 +1,13 @@
+Testing_models:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: https://rb83340.europe-west4.gcp.snowflakecomputing.com/
+      user: ranjuramesh
+      password: NpI9UcA8Cn#9
+      role: accountadmin
+      database: rawdata_db
+      warehouse: compute_wh
+      schema: testing_schema_anurag
+      threads: 4
