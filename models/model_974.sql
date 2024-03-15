@@ -1,5 +1,3 @@
 {{ config(materialized='table') }}
 
-SELECT m.*, t.*
-FROM {{ ref('model_973') }} m
-JOIN snowflake_sample_data.tpch_sf1.part t ON m.l_partkey = t.p_partkey
+SELECT * FROM {{ ref('model_973') }}
