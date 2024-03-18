@@ -1,0 +1,6 @@
+locations:
+- build:
+    directory: ./Anurag_Project_Testing_New
+  code_source:
+    module_name: Anurag_Project_Testing_New.definitions
+  location_name: Anurag_Project_Testing_New
