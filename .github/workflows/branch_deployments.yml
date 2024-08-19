@@ -1,4 +1,4 @@
-name: Serverless Branch Deployments
+name: Serverless Branch Deployments --comment
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
