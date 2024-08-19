@@ -2,4 +2,8 @@
 target/
 dbt_packages/
 logs/
+<<<<<<< HEAD
+--comment
+=======
 --
+>>>>>>> branch 'main' of git@github.com:Majorjohn2023/Testingthousandmodels.git
